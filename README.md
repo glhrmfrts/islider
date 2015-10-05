@@ -31,4 +31,15 @@ $('.my-slider').iSlider({
 ```
 Otherwise, it will check if animate.css is linked to your HTML page.
 
+### Callbacks
+
+Currenly, there is only one callback 'onChange(index)', called when the current slide changes. Use it like this:
+```js
+$('.my-slider').iSlider({
+  onChange: function(index) {
+    // do things
+  }
+});
+```
+
 All config options will be listed here soon, for now, you can take a look at the code.
