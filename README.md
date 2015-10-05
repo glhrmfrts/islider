@@ -1,5 +1,5 @@
 # islider
-**islider** stands for **I**tem **slider**. It uses animate.css to make slideshows more animated. An example will be available soon.
+**islider** stands for **I**tem **slider**. It uses [animate.css](https://github.com/daneden/animate.css) to make slideshows more animated. An example will be available soon.
 
 ## Usage
 This is the markup needed:
