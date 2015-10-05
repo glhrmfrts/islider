@@ -4,7 +4,7 @@
 ## Usage
 This is the markup needed:
 ```html
-<div class="slider">
+<div class="my-slider">
   <div class="slide">
     <h1 class="slide-item">Title One</h1>
     <p class="slide-item">Content one</p>
@@ -18,14 +18,14 @@ This is the markup needed:
 
 And the js:
 ```js
-var mySlider = $('.slider').iSlider();
+$('.my-slider').iSlider();
 ```
 
 Done. Your slideshow is fully animated now.
 
 If you don't want to use animate.css for the animations (or you're not linking it directly to your HTML), you can do:
 ```js
-$('.slider').iSlider({
+$('.my-slider').iSlider({
   useAnimateCss: false
 });
 ```
