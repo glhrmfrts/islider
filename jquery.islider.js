@@ -12,22 +12,28 @@
 		fin: ['fadeIn', 'fadeInUp', 'fadeInLeft', 'fadeInRight', 'fadeInBottom'],
 		fout: ['fadeOut', 'fadeOutUp', 'fadeOutLeft', 'fadeOutRight', 'fadeOutBottom']
 	}
+
 	var config = {
 		auto: true,
 		interval: 10000,
-		distance: 250,
+		delay: 250,
 		useAnimateCss: true,
 		buttonsHtml: '',
+		buttons: true,
+		breakpoints: {},
+		simple: false,
 		onChange: function(index) {}
 	}
+
 	var errPrefix = 'iSlider Error: ';
+	var changing = false;
 
 	var assertAnimateCss = function() {
 		var links = document.querySelectorAll('link[rel=stylesheet]');
 		links = Array.prototype.filter.call(links, function(link) {
 			return link.href.indexOf('animate') >= 0;
 		})
-		if (false /*!links.length */) {
+		if (!links.length) {
 			throw 'iSlider Error: Please include animate.css file: "https://daneden.github.io/animate.css/"';
 		}
 	}
@@ -38,19 +44,45 @@
 		tag.innerText = style;
 		var head = document.getElementsByTagName('head')[0];
 		head.appendChild(tag);
+	} 
+
+	var getBreakpointConfig = function(breakpoints) {
+		var win = window.innerWidth;
+		var prev = 0;
+
+		var brks = [];
+		for (var key in breakpoints) {
+			brks.push(key);
+		}
+
+		var len = brks.length;
+		var chosen = undefined;
+		brks.forEach(function(it, i) {
+			var cond = false;
+			if (win >= prev && win <= it) {
+				chosen = breakpoints[it];
+			}
+			prev = key;
+		});
+
+		return chosen;
 	}
 
 	var iSlider = function(cfg) {
+		assertAnimateCss();
 		insertCustomCss();
 		$slider = $(this);
 		slidesCount = $slider.children().length;
+
+		if ('breakpoints' in cfg) {
+			cfg = getBreakpointConfig(cfg.breakpoints) || cfg;
+		}
 		for (var key in cfg) {
 			if (config.hasOwnProperty(key))
 				config[key] = cfg[key];
 			else
 				console.warn(errPrefix + 'Invalid config option "'+ key +'"');
 		}
-		void(config.useAnimateCss && assertAnimateCss());
 		init();
 		return $slider;
 	}
@@ -98,12 +130,16 @@
 		$parent.append($buttons);
 
 		$('.iSlider-btns .iSlider-btn').on('click', function(e) {
-			restartInterval();
-			setActive(parseInt($(this).data('idx')));
+			if (!changing) {
+				restartInterval();
+				setActive(parseInt($(this).data('idx')));
+			}
 		});
 	}
 
 	var init = function() {
+		void(config.useAnimateCss && assertAnimateCss());
+		
 		$slider.find('.slide').hide(0);
 		$slider.find('.slide').each(function() {
 			var items = $(this).find('.slide-item').css({opacity: '0'});
@@ -111,7 +147,9 @@
 		});
 		setActive(0);
 
-		createButtons();
+		if (config.buttons) {
+			createButtons();
+		}
 
 		if (config.auto)
 			createInterval();
@@ -161,10 +199,14 @@
 
 	var hideSlide = function($slide, $next) {
 		var items = $slide.find('.slide-item');
+		changing = true;
 		items.each(function(i, it) {
 			it.className = it.className.replace(/animated [a-zA-Z]+/, '');
 			setTimeout(function() {
-				var anim = Math.floor(Math.random() * animations.fout.length);
+				var anim = 0;
+				if (!config.simple) {
+					anim = Math.floor(Math.random() * animations.fout.length);
+				}
 				anim = animations.fout[anim];
 				$(it).addClass('animated '+ anim);
 				setTimeout(function() {
@@ -172,13 +214,14 @@
 					if (i == items.length - 1) {
 						setTimeout(function() {
 							$slide.hide(0);
+							changing = false;
 							if ($next) {
 								setNextSlide($next);
 							}
 						}, 250);
 					}
 				}, 1000);
-			}, i * config.distance);
+			}, i * config.delay);
 		})
 	}
 
@@ -190,16 +233,21 @@
 	var showSlide = function($slide) {
 		var items = $slide.find('.slide-item');
 		$slide.show();
+		changing = true;
 		items.each(function(i, it) {
 			it.className = it.className.replace(/animated [a-zA-Z]+/, '');
 			setTimeout(function() {
-				var anim = Math.floor(Math.random() * animations.fin.length);
+				var anim = 0;
+				if (!config.simple) {
+					anim = Math.floor(Math.random() * animations.fin.length);
+				}
 				anim = animations.fin[anim];
 				$(it).addClass('animated '+ anim);
 				setTimeout(function() {
+					changing = false;
 					it.style.opacity = '1';
 				}, 1000);
-			}, i * 250);
+			}, i * config.delay);
 		});
 	}
 
